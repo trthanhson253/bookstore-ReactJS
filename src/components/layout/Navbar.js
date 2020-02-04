@@ -1,7 +1,24 @@
-import React from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { Link } from "react-router-dom";
-// import logo from "../../static/img/logo.png";
-const Navbar = () => {
+import { getAllCates } from "../../actions/catesApi";
+import { isAuthenticate, onLogout } from "../../actions/loginApi";
+
+const Navbar = ({ history }) => {
+  const [cates, setCates] = useState([]);
+
+  const loadAllCates = () => {
+    getAllCates().then(data => {
+      if (data) {
+        setCates(data);
+      } else {
+      }
+    });
+  };
+
+  useEffect(() => {
+    loadAllCates();
+  }, []);
+
   return (
     <div className="bea-portal-body-content" id="bea-portal-body-content">
       <div className="bea-portal-body-header">
@@ -17,7 +34,7 @@ const Navbar = () => {
               >
                 <ul className="nav navbar-nav">
                   <li className="alibris-logo">
-                    <Link className="navbar-brand" to="#">
+                    <Link className="navbar-brand" to="/">
                       <img
                         src={require("../../static/img/logo.png")}
                         alt="logo"
@@ -26,14 +43,14 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li className="dropdown yamm-fw">
-                    <Link
+                    <a
                       href="javascript:;"
                       className="dropdown-toggle nav-top"
                       style={{ textDecoration: "none" }}
                     >
                       <img src={require("../../static/img/list.png")} />
                       &nbsp;Categories
-                    </Link>
+                    </a>
                     <ul className="dropdown-menu">
                       <li className="grid-subnav">
                         <div className="row">
@@ -41,7 +58,7 @@ const Navbar = () => {
                             <ul className="trigger-menu" role="menu">
                               <li
                                 className="trigger-item maintainHover"
-                                data-submenu-id="books-subjects"
+                                data-submenu-id="books-msubjects"
                               >
                                 Books List By Subjects
                                 <span className="menu-chevron">&gt;</span>
@@ -59,11 +76,16 @@ const Navbar = () => {
                                   <div className="sub-panel-content">
                                     <div className="row">
                                       <div className="col-sm-2">
-                                        <ul className="submenu-inner first clearfix">
-                                          <li>
-                                            <Link to="#">cate.name</Link>
-                                          </li>
-                                        </ul>
+                                        {cates.map((cate, i) => (
+                                          <ul
+                                            className="submenu-inner first clearfix"
+                                            key={i}
+                                          >
+                                            <Link to={`/cates/list/${cate.id}`}>
+                                              <li>{cate.name}</li>
+                                            </Link>
+                                          </ul>
+                                        ))}
                                       </div>
                                     </div>
                                   </div>
@@ -77,7 +99,7 @@ const Navbar = () => {
                   </li>
                   <li className="dropdown yamm-fw">
                     <Link
-                      to="#"
+                      to="/books/all"
                       className="dropdown-toggle nav-top"
                       style={{ textDecoration: "none" }}
                     >
@@ -91,118 +113,137 @@ const Navbar = () => {
                 </ul>
                 <div className="login-nav">
                   <ul className="nav navbar-nav">
-                    <li className="dropdown">
-                      <Link to="#" className="dropdown-toggle sign-in"></Link>
-                      <div className="name" title="son">
-                        <Link to="#" className="dropdown-toggle sign-in"></Link>
-                        <Link to="/login">
-                          <strong>Sign In</strong>
-                        </Link>
-                      </div>
-                    </li>
-                    <li className="dropdown">
-                      <Link to="#" className="dropdown-toggle sign-in">
-                        <div className="name" title="son">
-                          Favorite List
-                        </div>
-                        <b className="caret" />
-                      </Link>
-                      <ul
-                        className="dropdown-menu dropdown-menu-right account "
-                        style={{ display: "none", width: "350px" }}
-                      >
-                        <li>
-                          <div className="yamm-content">
-                            <div className="form-group">
-                              <div
-                                className="row"
-                                style={{
-                                  fontFamily: "Arial, Helvetica, sans-serif"
-                                }}
-                              >
-                                <div
-                                  className="col-lg-12"
-                                  style={{ height: "100%" }}
-                                >
-                                  <div className="col-lg-4">
-                                    <Link to="#">
-                                      <img
-                                        className="card-img-top"
-                                        style={{
-                                          width: "60px",
-                                          height: "60px"
-                                        }}
-                                      />
-                                    </Link>
-                                  </div>
-                                  <div className="col-lg-6">
-                                    <Link to="#">
-                                      <strong>a</strong>
-                                    </Link>
-                                    <p>by </p>
-                                  </div>
-                                  <Link
-                                    href="javascript:;"
-                                    className="col-lg-2"
+                    {isAuthenticate() && isAuthenticate().role == "USER" && (
+                      <Fragment>
+                        <li className="dropdown">
+                          <Link to="#" className="dropdown-toggle sign-in">
+                            <div className="name" title="son">
+                              Favorite List
+                            </div>
+                            <b className="caret" />
+                          </Link>
+                          <ul
+                            className="dropdown-menu dropdown-menu-right account "
+                            style={{ display: "none", width: "350px" }}
+                          >
+                            <li>
+                              <div className="yamm-content">
+                                <div className="form-group">
+                                  <div
+                                    className="row"
+                                    style={{
+                                      fontFamily: "Arial, Helvetica, sans-serif"
+                                    }}
                                   >
-                                    Remove
-                                  </Link>
-                                  <br />
+                                    <div
+                                      className="col-lg-12"
+                                      style={{ height: "100%" }}
+                                    >
+                                      <div className="col-lg-4">
+                                        <Link to="#">
+                                          <img
+                                            className="card-img-top"
+                                            style={{
+                                              width: "60px",
+                                              height: "60px"
+                                            }}
+                                          />
+                                        </Link>
+                                      </div>
+                                      <div className="col-lg-6">
+                                        <Link to="#">
+                                          <strong>a</strong>
+                                        </Link>
+                                        <p>by </p>
+                                      </div>
+                                      <Link
+                                        href="javascript:;"
+                                        className="col-lg-2"
+                                      >
+                                        Remove
+                                      </Link>
+                                      <br />
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </div>
+                            </li>
+                          </ul>
                         </li>
-                      </ul>
-                    </li>
-                    <li className="dropdown">
-                      <Link to="#" className="dropdown-toggle sign-in">
+                        <li className="dropdown">
+                          <Link to="#" className="dropdown-toggle sign-in">
+                            <div className="name" title="son">
+                              <img
+                                src="
+                          'http://localhost:8184/image/user/' 
+                          
+                        "
+                                border={0}
+                                style={{ height: "15px", width: "20px" }}
+                              />
+                            </div>
+                            <b className="caret" />
+                          </Link>
+                          <ul
+                            className="dropdown-menu dropdown-menu-right account "
+                            style={{ display: "none" }}
+                          >
+                            <li>
+                              <div className="yamm-content">
+                                <div className="form-group">
+                                  <p
+                                    style={{
+                                      fontFamily: "Arial, Helvetica, sans-serif"
+                                    }}
+                                  >
+                                    Signed in as <strong>name</strong>
+                                  </p>
+                                  {/* <p style="font-family:Arial, Helvetica, sans-serif">
+                          <strong>.... {{ currentUser.email | slice:8 }}</strong>
+                        </p> */}
+                                  <hr />
+                                  <Link to="/my-account/home">My Account</Link>
+                                  <Link to="/my-account/shipping">
+                                    My Address
+                                  </Link>
+                                  <Link to="#">My Card</Link>
+                                  <Link to="#">My Order</Link>
+                                  <Link to="#">My Favorite Book</Link>
+                                  <hr />
+                                </div>
+                                <div className="form-group">
+                                  <a
+                                    href="javascript:;"
+                                    className="btn btn-lg btn-main"
+                                    onClick={() =>
+                                      onLogout(() => {
+                                        history.push("/");
+                                      })
+                                    }
+                                  >
+                                    Sign Out
+                                  </a>
+                                </div>
+                              </div>
+                            </li>
+                          </ul>
+                        </li>
+                      </Fragment>
+                    )}
+                    {!isAuthenticate() && (
+                      <li className="dropdown">
+                        <Link to="#" className="dropdown-toggle sign-in"></Link>
                         <div className="name" title="son">
-                          <img
-                            src="
-                            'http://localhost:8184/image/user/' 
-                            
-                          "
-                            border={0}
-                            style={{ height: "15px", width: "20px" }}
-                          />
+                          <Link
+                            to="#"
+                            className="dropdown-toggle sign-in"
+                          ></Link>
+                          <Link to="/login">
+                            <strong>Sign In/Register</strong>
+                          </Link>
                         </div>
-                        <b className="caret" />
-                      </Link>
-                      <ul
-                        className="dropdown-menu dropdown-menu-right account "
-                        style={{ display: "none" }}
-                      >
-                        <li>
-                          <div className="yamm-content">
-                            <div className="form-group">
-                              <p
-                                style={{
-                                  fontFamily: "Arial, Helvetica, sans-serif"
-                                }}
-                              >
-                                Signed in as <strong>name</strong>
-                              </p>
-                              {/* <p style="font-family:Arial, Helvetica, sans-serif">
-                            <strong>.... {{ currentUser.email | slice:8 }}</strong>
-                          </p> */}
-                              <hr />
-                              <Link to="#">My Account</Link>
-                              <Link to="#">My Address</Link>
-                              <Link to="#">My Card</Link>
-                              <Link to="#">My Order</Link>
-                              <Link to="#">My Favorite Book</Link>
-                              <hr />
-                            </div>
-                            <div className="form-group">
-                              <Link to="#" className="btn btn-lg btn-main">
-                                Sign Out
-                              </Link>
-                            </div>
-                          </div>
-                        </li>
-                      </ul>
-                    </li>
+                      </li>
+                    )}{" "}
                     <li className="cart-nav">
                       <Link to="#" className="dropdown-toggle cart">
                         <img
